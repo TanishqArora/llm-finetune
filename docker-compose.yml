@@ -1,0 +1,75 @@
+version: "3.9"
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama_data:/root/.ollama             # persist models
+      - ./modelfiles:/workspace/modelfiles:ro # Modelfiles to build from
+      - ./adapters:/workspace/adapters:ro     # trained LoRA adapters
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: ["gpu"]           # enable GPU
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  dev:  # Jupyter + CUDA + finetuning toolchain
+    build:
+      context: ./docker/dev
+      dockerfile: Dockerfile
+    container_name: llm-dev
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./data:/workspace/data
+      - ./adapters:/workspace/adapters
+      - ./modelfiles:/workspace/modelfiles
+      - ./notebooks:/workspace/notebooks
+      - ./src:/workspace/src
+    environment:
+      - HF_TOKEN=${HF_TOKEN:-}
+      - OLLAMA_HOST=http://ollama:11434
+      - JUPYTER_TOKEN=${JUPYTER_TOKEN:-llm}
+    command:
+      - jupyter
+      - lab
+      - --ip=0.0.0.0
+      - --port=8888
+      - --ServerApp.token=${JUPYTER_TOKEN}
+      - --no-browser
+      - --ServerApp.allow_origin=*
+      - --ServerApp.allow_remote_access=True
+      - --allow-root
+    depends_on:
+      - ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: ["gpu"]
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    container_name: llm-app
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      - ollama
+    command: python -u /app/src/app.py
+
+volumes:
+  ollama_data:

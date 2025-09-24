@@ -1,0 +1,4 @@
+# Wrap a base pulled model with defaults (example: gpt-oss:latest)
+FROM gpt-oss:latest
+PARAMETER temperature 0.2
+SYSTEM You are a helpful coding assistant.

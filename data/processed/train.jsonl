@@ -1,0 +1,4 @@
+{"instruction": "Translate English to French", "input": "Hello", "output": "Bonjour"}
+{"instruction": "Translate English to French", "input": "Goodbye", "output": "Au revoir"}
+{"instruction": "What is 2+2?", "input": "", "output": "4"}
+{"instruction": "Who wrote Hamlet?", "input": "", "output": "William Shakespeare"}

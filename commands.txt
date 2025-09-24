@@ -1,0 +1,39 @@
+Start the stack (Ollama + Dev/Jupyter + App):
+docker compose up -d --build
+docker compose logs -f dev
+
+
+Pull a base model into Ollama (inside the ollama container):
+docker compose exec ollama ollama pull gpt-oss:latest
+# or: ollama pull mistral:7b   (pick a real base model you plan to fine-tune)
+
+
+Train to produce a LoRA adapter (inside dev container):
+# Put your processed JSONL at ./data/processed/train.jsonl first
+docker compose exec dev python /workspace/src/training/finetune_unsloth.py
+
+
+Build the Ollama model that applies your LoRA:
+docker compose exec ollama ollama create mymodel:finetuned -f /workspace/modelfiles/mymodel.finetuned.Modelfile
+
+
+Test it directly in Ollama:
+docker compose exec -it ollama ollama run mymodel:finetuned
+
+
+Use it from your Python app (container logs will show output):
+docker compose logs -f app
+# Or override model:  docker compose run -e MODEL_NAME=mymodel:finetuned app
+
+
+Jupyter Lab (running inside the dev container):
+Open: http://localhost:8888
+Token: set via .env as JUPYTER_TOKEN=llm (default llm)
+
+Persistency:
+Ollama models: Docker volume ollama_data
+Your data/adapters/notebooks/src: bind-mounted from the repo
+
+
+Stop everything:
+docker compose down

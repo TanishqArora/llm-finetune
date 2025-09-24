@@ -1,0 +1,5 @@
+# Build an Ollama model that applies a LoRA adapter produced during training
+FROM gpt-oss:latest
+ADAPTER /workspace/adapters/myrun-2025-09-24
+PARAMETER temperature 0.2
+SYSTEM You are a precise analyst and coder. Prefer short, correct answers.
