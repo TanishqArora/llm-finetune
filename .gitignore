@@ -1,3 +1,4 @@
 adapters
 notebooks/.ipynb*
 notebooks/.Trash*
+.env/

@@ -34,6 +34,8 @@ Persistency:
 Ollama models: Docker volume ollama_data
 Your data/adapters/notebooks/src: bind-mounted from the repo
 
+# Save the finetuned model to ollama
+ollama create mymodel:finetuned -f /workspace/modelfiles/mymodel.finetuned.Modelfile
 
 Stop everything:
 docker compose down

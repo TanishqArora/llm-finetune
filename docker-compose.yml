@@ -25,8 +25,8 @@ services:
 
   dev:  # Jupyter + CUDA + finetuning toolchain
     build:
-      context: ./docker/dev
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: docker/dev/Dockerfile
     container_name: llm-dev
     ports:
       - "8888:8888"
